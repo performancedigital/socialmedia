@@ -1,13 +1,12 @@
-/**
- * @file page.tsx
- * @description Componente principal da aplicação NexusCopy. 
+ * @description Componente principal da aplicação Performance Social Media. 
+* @description Componente principal da aplicação Performance Social Media. 
  * Interface profissional para geração de estratégias e copys de redes sociais.
  */
 
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Calendar, Image as ImageIcon, Layers, Loader2, Send, MessageSquare, Settings, Zap } from "lucide-react";
+import { Sparkles, Calendar, Image as ImageIcon, Layers, Loader2, Send, MessageSquare, Settings, Zap, Download, Copy, Check } from "lucide-react";
 import ChatPanel from "./components/ChatPanel";
 
 export default function Home() {
@@ -22,6 +21,58 @@ export default function Home() {
   const [result, setResult] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("schedule");
   const [showChat, setShowChat] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState<string | null>(null);
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const downloadCSV = () => {
+    if (!result) return;
+    
+    let csv = "Dia,Formato,Tema,Objetivo\n";
+    result.schedule?.forEach((item: any) => {
+      csv += `${item.day},"${item.format}","${item.theme}","${item.objective}"\n`;
+    });
+    
+    csv += "\nPOSTS ESTÁTICOS\nTitulo,Legenda,Hashtags,Prompt de Imagem\n";
+    result.staticPosts?.forEach((post: any) => {
+      csv += `"${post.title}","${post.caption.replace(/"/g, '""')}","${post.hashtags}","${post.imagePrompt}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `cronograma-${formData.clientName || 'social-media'}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleGenerateImage = async (prompt: string, id: string) => {
+    setGeneratingImage(id);
+    try {
+      const res = await fetch("/api/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setImageUrls(prev => ({ ...prev, [id]: data.url }));
+    } catch (err: any) {
+      alert(`Erro ao gerar imagem: ${err.message}`);
+    } finally {
+      setGeneratingImage(null);
+    }
+  };
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +103,7 @@ export default function Home() {
             N
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-white">NexusCopy SaaS</h2>
+            <h2 className="text-sm font-semibold text-white">Performance Social Media</h2>
             <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-bold">Painel de Controle</p>
           </div>
         </div>
@@ -64,14 +115,14 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1 p-4 md:p-6 flex flex-col lg:flex-row gap-6 h-[calc(100vh-72px)] overflow-hidden">
+      <main className="flex-1 p-4 md:p-6 flex flex-col lg:flex-row-reverse gap-6 h-[calc(100vh-72px)] overflow-hidden">
         {/* Sidebar - Form */}
         <aside className="w-full lg:w-80 xl:w-96 flex flex-col gap-4 overflow-y-auto pr-2 shrink-0">
           <div className="glass-panel p-6 rounded-3xl flex flex-col h-fit border-indigo-500/10">
             <div className="mb-6">
               <h1 className="text-2xl font-bold glow-text flex items-center gap-3">
                 <Sparkles className="text-indigo-400" size={24} />
-                NexusCopy
+                Performance Social Media
               </h1>
             </div>
 
@@ -189,25 +240,33 @@ export default function Home() {
 
           {result && !loading && (
             <div className="flex flex-col h-full overflow-hidden">
-              {/* Tabs */}
-              <div className="flex gap-2 mb-6 border-b border-white/10 pb-4 overflow-x-auto shrink-0">
+              {/* Tabs & Export */}
+              <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4 shrink-0">
+                <div className="flex gap-2 overflow-x-auto">
+                  <button 
+                    onClick={() => setActiveTab('schedule')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'schedule' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50' : 'text-gray-500 hover:text-gray-300'}`}
+                  >
+                    <Calendar size={14} /> Cronograma
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('static')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'static' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50' : 'text-gray-500 hover:text-gray-300'}`}
+                  >
+                    <ImageIcon size={14} /> Estáticos
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('carousels')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'carousels' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50' : 'text-gray-500 hover:text-gray-300'}`}
+                  >
+                    <Layers size={14} /> Carrosséis
+                  </button>
+                </div>
                 <button 
-                  onClick={() => setActiveTab('schedule')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'schedule' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50' : 'text-gray-500 hover:text-gray-300'}`}
+                  onClick={downloadCSV}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all"
                 >
-                  <Calendar size={14} /> Cronograma
-                </button>
-                <button 
-                  onClick={() => setActiveTab('static')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'static' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50' : 'text-gray-500 hover:text-gray-300'}`}
-                >
-                  <ImageIcon size={14} /> Estáticos
-                </button>
-                <button 
-                  onClick={() => setActiveTab('carousels')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'carousels' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/50' : 'text-gray-500 hover:text-gray-300'}`}
-                >
-                  <Layers size={14} /> Carrosséis
+                  <Download size={14} /> Exportar CSV
                 </button>
               </div>
 
@@ -239,7 +298,16 @@ export default function Home() {
                         <h3 className="text-lg font-bold text-white mb-4 glow-text">{post.title}</h3>
                         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                           <div>
-                            <h4 className="text-[10px] uppercase tracking-tighter text-indigo-400 font-black mb-2">Legenda Estratégica</h4>
+                            <div className="flex justify-between items-center mb-2">
+                              <h4 className="text-[10px] uppercase tracking-tighter text-indigo-400 font-black">Legenda Estratégica</h4>
+                              <button 
+                                onClick={() => copyToClipboard(post.caption, `copy-static-${idx}`)}
+                                className="text-[10px] text-gray-500 hover:text-white flex items-center gap-1 transition-colors"
+                              >
+                                {copiedId === `copy-static-${idx}` ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                                {copiedId === `copy-static-${idx}` ? 'Copiado' : 'Copiar'}
+                              </button>
+                            </div>
                             <div className="bg-black/20 p-4 rounded-2xl border border-white/5 text-xs text-gray-300 leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto">
                               {post.caption}
                               <div className="mt-4 text-indigo-300/60">{post.hashtags}</div>
@@ -250,9 +318,21 @@ export default function Home() {
                             <div className="bg-purple-500/5 p-4 rounded-2xl border border-purple-500/10 text-[11px] font-mono text-purple-200/70 leading-relaxed max-h-40 overflow-y-auto">
                               {post.imagePrompt}
                             </div>
-                            <button className="w-full mt-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-[10px] font-bold py-2 rounded-xl border border-purple-500/20 transition-all uppercase tracking-widest">
-                              Gerar Imagem Agora
-                            </button>
+                            
+                            {imageUrls[`static-${idx}`] ? (
+                              <div className="mt-3 rounded-2xl overflow-hidden border border-white/10">
+                                <img src={imageUrls[`static-${idx}`]} alt="AI Generated" className="w-full h-auto" />
+                              </div>
+                            ) : (
+                              <button 
+                                onClick={() => handleGenerateImage(post.imagePrompt, `static-${idx}`)}
+                                disabled={generatingImage === `static-${idx}`}
+                                className="w-full mt-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-[10px] font-bold py-2 rounded-xl border border-purple-500/20 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+                              >
+                                {generatingImage === `static-${idx}` ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                {generatingImage === `static-${idx}` ? 'Gerando...' : 'Gerar Imagem Agora'}
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -294,7 +374,7 @@ export default function Home() {
         {/* Chat Sidebar */}
         {showChat && (
           <aside className="w-full lg:w-80 xl:w-96 h-full animate-in slide-in-from-right duration-300 shrink-0">
-            <ChatPanel onApplyData={(data) => setFormData({...formData, ...data})} />
+            <ChatPanel formData={formData} onApplyData={(data) => setFormData({...formData, ...data})} />
           </aside>
         )}
       </main>
