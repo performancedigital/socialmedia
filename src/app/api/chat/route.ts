@@ -1,5 +1,17 @@
+/**
+ * @file route.ts
+ * @description Rota de API para o Chat de Planejamento Estratégico.
+ * Utiliza o modelo GPT-4o da OpenAI para auxiliar o usuário no brainstorming de campanhas.
+ */
+
 import { NextResponse } from 'next/server';
 
+/**
+ * Lida com requisições POST para conversação com o estrategista IA.
+ * 
+ * @param {Request} request - Objeto da requisição contendo o histórico de `messages`.
+ * @returns {NextResponse} Resposta com a conclusão do chat da OpenAI.
+ */
 export async function POST(request: Request) {
   try {
     const { messages } = await request.json();

@@ -1,8 +1,20 @@
+/**
+ * @file ChatPanel.tsx
+ * @description Componente de interface de chat para o Estrategista Nexus.
+ * Permite que o usuário faça brainstorming de campanhas com a IA.
+ */
+
 "use client";
 
 import { useState } from "react";
 import { MessageSquare, Send, Bot, User, Loader2, Sparkles } from "lucide-react";
 
+/**
+ * Componente `ChatPanel` fornece uma interface de chat flutuante ou lateral.
+ * 
+ * @param {Object} props - Propriedades do componente.
+ * @param {Function} props.onApplyData - Função callback para aplicar sugestões da IA ao formulário principal.
+ */
 export default function ChatPanel({ onApplyData }: { onApplyData: (data: any) => void }) {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");

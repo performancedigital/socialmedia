@@ -11,6 +11,10 @@ import { enlargePrompt } from '@/lib/ai-service';
 /**
  * Lida com as requisições POST para gerar copys usando Inteligência Artificial.
  * 
+ * Esta função executa um fluxo de duas etapas:
+ * 1. Enriquecimento: Usa o serviço `enlargePrompt` para expandir os dados básicos.
+ * 2. Geração: Usa o Gemini para criar o cronograma completo de 30 dias com base nos dados enriquecidos.
+ * 
  * @param {Request} request - O objeto de requisição recebido do cliente.
  * 
  * Espera-se que o corpo (body) da requisição seja um JSON contendo:

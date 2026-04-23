@@ -3,6 +3,17 @@
  * @description Centraliza as chamadas de IA para expansão de prompts e geração de conteúdo.
  */
 
+/**
+ * Enriquece e expande os inputs básicos do usuário em uma estratégia ultra-detalhada.
+ * Esta função atua como uma camada de 'Prompt Engineering' automatizada.
+ * 
+ * @param {Object} input - Dados básicos fornecidos pelo usuário.
+ * @param {string} input.theme - Tema da campanha.
+ * @param {string} input.clientName - Nome do cliente.
+ * @param {string} input.targetAudience - Público alvo básico.
+ * 
+ * @returns {Promise<Object|null>} Objeto com `expandedAudience`, `expandedTheme` e `visualStyle` ou null em caso de erro.
+ */
 export async function enlargePrompt(input: { theme: string, clientName: string, targetAudience: string }) {
   const apiKey = process.env.GEMINI_API_KEY;
   

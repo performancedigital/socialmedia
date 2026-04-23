@@ -1,3 +1,8 @@
+/**
+ * @file supabase.ts
+ * @description Configuração e inicialização do cliente Supabase para persistência de dados e autenticação.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
