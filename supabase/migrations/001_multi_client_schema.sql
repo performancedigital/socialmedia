@@ -1,6 +1,5 @@
 -- SQL para criar as tabelas do sistema multi-cliente
 -- Execute este script no SQL Editor do Supabase
--- POLICY ERRORS SÃO NORMAIS - significa que já existem
 
 -- ============================================
 -- TABELA: clients
@@ -20,48 +19,45 @@ CREATE TABLE IF NOT EXISTS clients (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Índices
 CREATE INDEX IF NOT EXISTS idx_clients_user_id ON clients(user_id);
 CREATE INDEX IF NOT EXISTS idx_clients_niche ON clients(niche);
 
--- RLS
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 
--- Policies (ignora erro se já existir)
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem ver seus próprios clientes"
+    CREATE POLICY "Usuarios podem ver seus proprios clientes"
         ON clients FOR SELECT
         USING (auth.uid() = user_id);
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem criar clientes"
+    CREATE POLICY "Usuarios podem criar clientes"
         ON clients FOR INSERT
         WITH CHECK (auth.uid() = user_id);
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem atualizar seus clientes"
+    CREATE POLICY "Usuarios podem atualizar seus clientes"
         ON clients FOR UPDATE
         USING (auth.uid() = user_id);
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem deletar seus clientes"
+    CREATE POLICY "Usuarios podem deletar seus clientes"
         ON clients FOR DELETE
         USING (auth.uid() = user_id);
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 -- ============================================
@@ -86,38 +82,38 @@ ALTER TABLE ai_personas ENABLE ROW LEVEL SECURITY;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem ver personas de seus clientes"
+    CREATE POLICY "Usuarios podem ver personas de seus clientes"
         ON ai_personas FOR SELECT
         USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = ai_personas.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem criar personas para seus clientes"
+    CREATE POLICY "Usuarios podem criar personas para seus clientes"
         ON ai_personas FOR INSERT
         WITH CHECK (EXISTS (SELECT 1 FROM clients WHERE clients.id = ai_personas.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem atualizar personas de seus clientes"
+    CREATE POLICY "Usuarios podem atualizar personas de seus clientes"
         ON ai_personas FOR UPDATE
         USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = ai_personas.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem deletar personas de seus clientes"
+    CREATE POLICY "Usuarios podem deletar personas de seus clientes"
         ON ai_personas FOR DELETE
         USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = ai_personas.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 -- ============================================
@@ -153,38 +149,38 @@ ALTER TABLE content_calendar ENABLE ROW LEVEL SECURITY;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem ver calendário de seus clientes"
+    CREATE POLICY "Usuarios podem ver calendario de seus clientes"
         ON content_calendar FOR SELECT
         USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = content_calendar.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem criar itens no calendário de seus clientes"
+    CREATE POLICY "Usuarios podem criar itens no calendario de seus clientes"
         ON content_calendar FOR INSERT
         WITH CHECK (EXISTS (SELECT 1 FROM clients WHERE clients.id = content_calendar.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem atualizar calendário de seus clientes"
+    CREATE POLICY "Usuarios podem atualizar calendario de seus clientes"
         ON content_calendar FOR UPDATE
         USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = content_calendar.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem deletar itens do calendário de seus clientes"
+    CREATE POLICY "Usuarios podem deletar itens do calendario de seus clientes"
         ON content_calendar FOR DELETE
         USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = content_calendar.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 -- ============================================
@@ -217,42 +213,42 @@ ALTER TABLE backlog_items ENABLE ROW LEVEL SECURITY;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem ver backlog de seus clientes"
+    CREATE POLICY "Usuarios podem ver backlog de seus clientes"
         ON backlog_items FOR SELECT
         USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = backlog_items.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem criar itens no backlog de seus clientes"
+    CREATE POLICY "Usuarios podem criar itens no backlog de seus clientes"
         ON backlog_items FOR INSERT
         WITH CHECK (EXISTS (SELECT 1 FROM clients WHERE clients.id = backlog_items.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem atualizar backlog de seus clientes"
+    CREATE POLICY "Usuarios podem atualizar backlog de seus clientes"
         ON backlog_items FOR UPDATE
         USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = backlog_items.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 DO $$
 BEGIN
-    CREATE POLICY "Usuários podem deletar itens do backlog de seus clientes"
+    CREATE POLICY "Usuarios podem deletar itens do backlog de seus clientes"
         ON backlog_items FOR DELETE
         USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = backlog_items.client_id AND clients.user_id = auth.uid()));
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Policy já existe';
+    RAISE NOTICE 'Policy ja existe';
 END $$;
 
 -- ============================================
--- FUNÇÕES E TRIGGERS
+-- FUNCOES E TRIGGERS
 -- ============================================
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -263,13 +259,12 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Triggers (ignora erro se já existir)
 DO $$
 BEGIN
     CREATE TRIGGER update_clients_updated_at BEFORE UPDATE ON clients
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Trigger já existe';
+    RAISE NOTICE 'Trigger ja existe';
 END $$;
 
 DO $$
@@ -277,7 +272,7 @@ BEGIN
     CREATE TRIGGER update_ai_personas_updated_at BEFORE UPDATE ON ai_personas
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Trigger já existe';
+    RAISE NOTICE 'Trigger ja existe';
 END $$;
 
 DO $$
@@ -285,7 +280,7 @@ BEGIN
     CREATE TRIGGER update_content_calendar_updated_at BEFORE UPDATE ON content_calendar
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Trigger já existe';
+    RAISE NOTICE 'Trigger ja existe';
 END $$;
 
 DO $$
@@ -293,29 +288,15 @@ BEGIN
     CREATE TRIGGER update_backlog_items_updated_at BEFORE UPDATE ON backlog_items
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 EXCEPTION WHEN duplicate_object THEN
-    RAISE NOTICE 'Trigger já existe';
+    RAISE NOTICE 'Trigger ja existe';
 END $$;
 
 -- ============================================
--- VIEWS
+-- VIEWS (sem SECURITY DEFINER para evitar warnings)
 -- ============================================
 
-CREATE OR REPLACE VIEW calendar_with_client AS
-SELECT 
-    cc.*,
-    c.name as client_name,
-    c.instagram_handle,
-    c.niche,
-    c.user_id
-FROM content_calendar cc
-JOIN clients c ON cc.client_id = c.id;
+DROP VIEW IF EXISTS calendar_with_client;
+DROP VIEW IF EXISTS backlog_with_client;
 
-CREATE OR REPLACE VIEW backlog_with_client AS
-SELECT 
-    bi.*,
-    c.name as client_name,
-    c.instagram_handle,
-    c.niche,
-    c.user_id
-FROM backlog_items bi
-JOIN clients c ON bi.client_id = c.id;
+-- Nao criamos views com security definer para evitar os warnings
+-- As queries podem ser feitas diretamente nas tabelas com JOIN
