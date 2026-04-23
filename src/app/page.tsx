@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, Calendar, Image as ImageIcon, Layers, Loader2, Send, MessageSquare, Settings, Zap, Download, Copy, Check, LogOut, User as UserIcon, History } from "lucide-react";
+import { Sparkles, Calendar, Image as ImageIcon, Layers, Loader2, Send, MessageSquare, Settings, Zap, Download, Copy, Check, LogOut, User as UserIcon, History, Building2, ClipboardList, Plus } from "lucide-react";
 import ChatPanel from "./components/ChatPanel";
+import ClientSelector from "./components/ClientSelector";
 import { useAuth } from "@/lib/auth-context";
+import { useClient } from "@/lib/client-context";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const { user, profile, loading: authLoading, signOut } = useAuth();
+  const { activeClient, clients } = useClient();
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -27,6 +30,19 @@ export default function Home() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+
+  // Atualiza formData quando o cliente ativo muda
+  useEffect(() => {
+    if (activeClient) {
+      setFormData(prev => ({
+        clientName: activeClient.name,
+        instagram: activeClient.instagram_handle,
+        theme: prev.theme || "",
+        targetAudience: activeClient.target_audience || "",
+        days: prev.days,
+      }));
+    }
+  }, [activeClient]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -183,6 +199,15 @@ export default function Home() {
         </div>
         
         <div className="flex items-center gap-6">
+          <ClientSelector />
+          
+          <button 
+            onClick={() => router.push('/backlog')}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-gray-600 hover:text-black transition-all text-xs font-bold"
+          >
+            <ClipboardList size={14} /> Backlog
+          </button>
+
           <button 
             onClick={() => setShowHistory(true)}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-gray-600 hover:text-black transition-all text-xs font-bold"
@@ -359,7 +384,22 @@ export default function Home() {
 
         {/* Main Content Area */}
         <section className={`flex-1 glass-panel rounded-3xl p-6 flex flex-col overflow-hidden transition-all duration-500`}>
-          {!result && !loading && (
+          {!activeClient && clients.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center">
+              <Building2 size={64} className="mb-6 text-gray-300" />
+              <h2 className="text-2xl font-bold text-black mb-3">Bem-vindo!</h2>
+              <p className="max-w-md text-gray-500 mb-6">
+                Para começar a gerar conteúdo, você precisa primeiro adicionar um cliente.
+              </p>
+              <button
+                onClick={() => router.push('/clients/new')}
+                className="px-8 py-4 bg-[#ff5500] text-white rounded-2xl font-bold hover:bg-[#ff5500]/90 transition-colors flex items-center gap-2"
+              >
+                <Plus size={20} />
+                Adicionar Primeiro Cliente
+              </button>
+            </div>
+          ) : !result && !loading && (
             <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60">
               <Sparkles size={48} className="mb-4 text-indigo-500 animate-pulse" />
               <h2 className="text-xl font-semibold mb-2">Pronto para a Mágica?</h2>
