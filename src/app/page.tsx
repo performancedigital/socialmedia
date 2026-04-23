@@ -1,16 +1,16 @@
-/**
- * @file page.tsx
- * @description Componente principal da aplicação Performance Social Media.
- * Interface profissional para geração de estratégias e copys de redes sociais.
- */
-
 "use client";
 
-import { useState } from "react";
-import { Sparkles, Calendar, Image as ImageIcon, Layers, Loader2, Send, MessageSquare, Settings, Zap, Download, Copy, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Sparkles, Calendar, Image as ImageIcon, Layers, Loader2, Send, MessageSquare, Settings, Zap, Download, Copy, Check, LogOut, User as UserIcon, History } from "lucide-react";
 import ChatPanel from "./components/ChatPanel";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
+  const { user, profile, loading: authLoading, signOut } = useAuth();
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     clientName: "",
     instagram: "",
@@ -24,8 +24,40 @@ export default function Home() {
   const [showChat, setShowChat] = useState(false);
   const [generatingImage, setGeneratingImage] = useState<string | null>(null);
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
-
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [history, setHistory] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+    } else if (user) {
+      fetchHistory();
+    }
+  }, [user, authLoading, router]);
+
+  const fetchHistory = async () => {
+    const { data } = await supabase
+      .from('projects')
+      .select('*, content_generations(*)')
+      .order('created_at', { ascending: false })
+      .limit(10);
+    setHistory(data || []);
+  };
+
+  const loadFromHistory = (project: any) => {
+    setFormData({
+      clientName: project.client_name,
+      instagram: project.instagram,
+      theme: project.theme,
+      targetAudience: project.target_audience,
+      days: project.days,
+    });
+    if (project.content_generations?.[0]) {
+      setResult(project.content_generations[0].content);
+    }
+    setShowHistory(false);
+  };
 
   const copyToClipboard = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -87,6 +119,32 @@ export default function Home() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setResult(data);
+
+      if (user) {
+        const { data: project } = await supabase
+          .from('projects')
+          .insert([{
+            user_id: user.id,
+            client_name: formData.clientName,
+            instagram: formData.instagram,
+            theme: formData.theme,
+            target_audience: formData.targetAudience,
+            days: formData.days
+          }])
+          .select()
+          .single();
+
+        if (project) {
+          await supabase
+            .from('content_generations')
+            .insert([{
+              project_id: project.id,
+              user_id: user.id,
+              content: data
+            }]);
+          fetchHistory();
+        }
+      }
     } catch (err: any) {
       alert(`Erro: ${err.message}`);
       console.error(err);
@@ -95,28 +153,102 @@ export default function Home() {
     }
   };
 
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+        <Loader2 className="animate-spin text-indigo-500" size={48} />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0a0f]">
+    <div className="min-h-screen flex flex-col bg-[#020617]">
       {/* Professional Header */}
       <header className="glass-panel border-b border-white/10 px-8 py-4 flex justify-between items-center bg-black/40 shrink-0">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
-            N
+            P
           </div>
           <div>
             <h2 className="text-sm font-semibold text-white">Performance Social Media</h2>
             <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-bold">Painel de Controle</p>
           </div>
         </div>
-        <div className="flex items-center gap-6 text-gray-400">
-          <div className="hidden md:flex items-center gap-2 text-xs border border-white/5 bg-white/5 px-3 py-1.5 rounded-full">
-            <Zap size={14} className="text-yellow-500" /> API Status: Ativo
+        
+        <div className="flex items-center gap-6">
+          <button 
+            onClick={() => setShowHistory(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-gray-400 hover:text-white transition-all text-xs font-bold"
+          >
+            <History size={14} /> Histórico
+          </button>
+
+          <div className="hidden md:flex items-center gap-3 pr-6 border-r border-white/10">
+            <div className="text-right">
+              <p className="text-xs font-bold text-white leading-none">{profile?.full_name || user.email}</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">{profile?.role === 'admin' ? 'Administrador' : 'Membro Premium'}</p>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400">
+              <UserIcon size={16} />
+            </div>
           </div>
-          <Settings size={18} className="hover:text-white cursor-pointer transition-colors" />
+          
+          <div className="flex items-center gap-4 text-gray-400">
+            {profile?.role === 'admin' && (
+              <button onClick={() => router.push('/admin')} className="text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors">
+                Admin
+              </button>
+            )}
+            <button onClick={signOut} className="hover:text-red-400 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+              Sair <LogOut size={16} />
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="flex-1 p-4 md:p-6 flex flex-col lg:flex-row-reverse gap-6 h-[calc(100vh-72px)] overflow-hidden">
+        {/* History Modal */}
+        {showHistory && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="glass-panel w-full max-w-2xl rounded-3xl overflow-hidden border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
+              <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
+                <h3 className="text-xl font-bold glow-text flex items-center gap-2">
+                  <History size={20} className="text-indigo-400" />
+                  Projetos Recentes
+                </h3>
+                <button onClick={() => setShowHistory(false)} className="text-gray-500 hover:text-white transition-colors">
+                  <Check size={20} />
+                </button>
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto p-6 custom-scrollbar">
+                {history.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    Nenhum projeto salvo ainda.
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {history.map((project: any) => (
+                      <div 
+                        key={project.id} 
+                        onClick={() => loadFromHistory(project)}
+                        className="bg-white/5 border border-white/10 p-4 rounded-2xl hover:bg-white/10 transition-all cursor-pointer group flex justify-between items-center"
+                      >
+                        <div>
+                          <h4 className="font-bold text-white group-hover:text-indigo-300 transition-colors">{project.client_name}</h4>
+                          <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">@{project.instagram} • {project.theme}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[10px] text-gray-500 uppercase">{new Date(project.created_at).toLocaleDateString('pt-BR')}</p>
+                          <span className="text-[10px] text-indigo-400 font-bold uppercase mt-1 block">Carregar</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {/* Sidebar - Form */}
         <aside className="w-full lg:w-80 xl:w-96 flex flex-col gap-4 overflow-y-auto pr-2 shrink-0">
           <div className="glass-panel p-6 rounded-3xl flex flex-col h-fit border-indigo-500/10">
