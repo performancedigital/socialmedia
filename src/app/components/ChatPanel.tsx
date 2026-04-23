@@ -1,45 +1,44 @@
-/**
- * @file ChatPanel.tsx
- * @description Componente de interface de chat para o Estrategista Performance Social Media.
- * Permite que o usuário faça brainstorming de campanhas com a IA.
- */
-
 "use client";
 
-import { useState } from "react";
-import { MessageSquare, Send, Bot, User, Loader2, Sparkles, Zap } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { useClient } from "@/lib/client-context";
+import { Send, Bot, Loader2, Sparkles, Zap, Trash2, X } from "lucide-react";
 
-/**
- * Componente `ChatPanel` fornece uma interface de chat flutuante ou lateral.
- * 
- * @param {Object} props - Propriedades do componente.
- * @param {Object} props.formData - Dados atuais do formulário principal.
- * @param {Function} props.onApplyData - Função callback para aplicar sugestões da IA ao formulário principal.
- */
-export default function ChatPanel({ formData, onApplyData }: { formData: any, onApplyData: (data: any) => void }) {
-  const [messages, setMessages] = useState<any[]>([]);
+interface ChatPanelProps {
+  onClose?: () => void;
+}
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export default function ChatPanel({ onClose }: ChatPanelProps) {
+  const { activeClient } = useClient();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const startAnalysis = async () => {
-    if (!formData.clientName || !formData.instagram) {
-      alert("Por favor, preencha o Nome e o Instagram no formulário ao lado primeiro.");
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const startAnalysis = () => {
+    if (!activeClient) {
+      alert("Selecione um cliente primeiro.");
       return;
     }
 
-    const analysisPrompt = `Olá! Sou o Estrategista da Performance Social Media. Acabei de ver que você está trabalhando com o projeto "${formData.clientName}" (@${formData.instagram}). 
-
-Gostaria que você fizesse uma análise estratégica inicial desse perfil, falasse sobre o nicho e sugerisse alguns temas poderosos para nossa campanha.`;
-
-    setInput(analysisPrompt);
-    // Trigger sendMessage immediately or just set input and let user click?
-    // Let's automate it for better UX
+    const prompt = `Analise o perfil @${activeClient.instagram_handle} (${activeClient.name}) no nicho ${activeClient.niche}. Forneca 3 ideias de conteudo.`;
+    setInput(prompt);
   };
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !activeClient) return;
 
-    const newMessages = [...messages, { role: "user", content: input }];
+    const userMessage: Message = { role: "user", content: input };
+    const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput("");
     setLoading(true);
@@ -48,90 +47,146 @@ Gostaria que você fizesse uma análise estratégica inicial desse perfil, falas
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ messages: newMessages, clientId: activeClient.id }),
       });
+      
       const data = await res.json();
       
       if (data.error) {
-        setMessages([...newMessages, { role: "assistant", content: `❌ Erro: ${data.error}` }]);
+        setMessages([...newMessages, { role: "assistant", content: `Erro: ${data.error}` }]);
         return;
       }
 
       if (data.choices?.[0]?.message) {
-        setMessages([...newMessages, data.choices[0].message]);
+        setMessages([...newMessages, {
+          role: "assistant",
+          content: data.choices[0].message.content
+        }]);
       }
     } catch (error) {
-      console.error("Chat error:", error);
-      setMessages([...newMessages, { role: "assistant", content: "❌ Falha crítica na conexão com o servidor de chat." }]);
+      setMessages([...newMessages, { 
+        role: "assistant", 
+        content: "Erro de conexao. Tente novamente." 
+      }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const extractData = () => {
-    // Basic extraction logic or just ask AI to format it
-    // For now, let's just let the user copy paste or add a button "Extrair do Chat"
-    // that calls another API or prompt
+  const clearChat = () => {
+    if (confirm("Limpar mensagens?")) setMessages([]);
   };
 
+  if (!activeClient) {
+    return (
+      <div className="flex flex-col h-full bg-white rounded-3xl border border-gray-200">
+        <div className="p-4 border-b border-gray-100 flex justify-between">
+          <div className="flex items-center gap-2">
+            <Bot size={20} className="text-gray-400" />
+            <span className="font-bold text-sm">Estrategista IA</span>
+          </div>
+          {onClose && <button onClick={onClose}><X size={18} /></button>}
+        </div>
+        <div className="flex-1 flex items-center justify-center p-8 text-center">
+          <Sparkles className="mx-auto mb-4 text-gray-300" size={48} />
+          <p className="text-gray-500">Selecione um cliente para comecar.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-full glass-panel rounded-3xl overflow-hidden border-gray-100">
-      <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-        <Bot size={20} className="text-gray-400" />
-        <h2 className="font-black text-xs uppercase tracking-widest text-black">ESTRATEGISTA DIGITAL</h2>
+    <div className="flex flex-col h-full bg-white rounded-3xl border border-gray-200 shadow-xl">
+      <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <div 
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+            style={{ backgroundColor: activeClient.brand_colors?.primary || '#000' }}
+          >
+            {activeClient.name.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <span className="font-bold text-sm">Estrategista IA</span>
+            <p className="text-xs text-gray-400">{activeClient.name}</p>
+          </div>
+        </div>
+        
+        <div className="flex gap-1">
+          {messages.length > 0 && (
+            <button onClick={clearChat} className="p-2 text-gray-400 hover:text-red-500">
+              <Trash2 size={16} />
+            </button>
+          )}
+          {onClose && (
+            <button onClick={onClose} className="p-2 text-gray-400 hover:text-black">
+              <X size={18} />
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-white">
-        {messages.length === 0 && (
-          <div className="text-center text-gray-400 py-10 px-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 ? (
+          <div className="text-center py-8">
             <Sparkles className="mx-auto mb-4 text-gray-200" size={48} />
-            <p className="mb-6 text-xs font-medium uppercase tracking-widest leading-relaxed">Olá! Preencha os dados ao lado para uma análise estratégica completa.</p>
+            <p className="text-gray-400 text-sm mb-4">Sou seu estrategista de conteudo.</p>
+            
             <button 
               onClick={startAnalysis}
-              className="bg-black text-white px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-800 transition-all flex items-center gap-2 mx-auto shadow-lg shadow-black/10"
+              className="bg-black text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 mx-auto"
             >
-              <Zap size={14} /> ANALISAR MEU PERFIL
+              <Zap size={16} /> 
+              Analisar @{activeClient.instagram_handle}
             </button>
           </div>
-        )}
-        {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-4 rounded-2xl text-sm ${
-              m.role === 'user' 
-                ? 'bg-black text-white rounded-tr-none' 
-                : 'bg-gray-100 text-black rounded-tl-none border border-gray-50'
-            }`}>
-              {m.content}
+        ) : (
+          messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
+                m.role === 'user' 
+                  ? 'bg-black text-white rounded-tr-none' 
+                  : 'bg-gray-100 text-black rounded-tl-none'
+              }`}>
+                {m.content}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
+        
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 p-3 rounded-2xl rounded-tl-none">
-              <Loader2 size={16} className="animate-spin text-gray-400" />
+            <div className="bg-gray-100 p-3 rounded-2xl flex items-center gap-2">
+              <Loader2 size={14} className="animate-spin text-gray-400" />
+              <span className="text-xs text-gray-400">Pensando...</span>
             </div>
           </div>
         )}
+        
+        <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-gray-100 bg-gray-50/30">
+      <div className="p-4 border-t border-gray-100 bg-gray-50">
         <div className="flex gap-2">
           <input 
             type="text"
-            className="flex-1 input-glass rounded-xl px-4 py-3 text-sm outline-none"
-            placeholder="Digite sua mensagem..."
+            className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-black"
+            placeholder="Digite sua pergunta..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+            onKeyDown={(e) => e.key === 'Enter' && !loading && sendMessage()}
           />
           <button 
             onClick={sendMessage}
-            disabled={loading}
-            className="bg-black text-white p-3 rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
+            disabled={loading || !input.trim()}
+            className="bg-black text-white p-3 rounded-xl hover:bg-gray-800 disabled:opacity-50"
           >
             <Send size={18} />
           </button>
         </div>
+        
+        <p className="text-[10px] text-gray-400 mt-2 text-center">
+          IA especialista em {activeClient.niche}
+        </p>
       </div>
     </div>
   );

@@ -555,7 +555,7 @@ export default function Home() {
         {/* Chat Sidebar */}
         {showChat && (
           <aside className="w-full lg:w-80 xl:w-96 h-full animate-in slide-in-from-right duration-300 shrink-0">
-            <ChatPanel formData={formData} onApplyData={(data) => setFormData({...formData, ...data})} />
+            <ChatPanel onClose={() => setShowChat(false)} />
           </aside>
         )}
       </main>
