@@ -155,51 +155,51 @@ export default function Home() {
 
   if (authLoading || !user) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <Loader2 className="animate-spin text-indigo-500" size={48} />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin text-black" size={48} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#020617]">
+    <div className="min-h-screen flex flex-col">
       {/* Professional Header */}
-      <header className="glass-panel border-b border-white/10 px-8 py-4 flex justify-between items-center bg-black/40 shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
-            P
+      <header className="glass-panel px-8 py-4 flex justify-between items-center shrink-0 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-black flex items-center justify-center rounded-md">
+            <div className="w-4 h-4 border-2 border-white transform rotate-45"></div>
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-white">Performance Social Media</h2>
-            <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-bold">Painel de Controle</p>
+            <h2 className="text-sm font-black tracking-tighter text-black uppercase">Performance <span className="font-light">Digital</span></h2>
+            <p className="text-[9px] text-gray-400 uppercase tracking-[0.2em] font-medium leading-none">Social Media Expert</p>
           </div>
         </div>
         
         <div className="flex items-center gap-6">
           <button 
             onClick={() => setShowHistory(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-gray-400 hover:text-white transition-all text-xs font-bold"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-gray-600 hover:text-black transition-all text-xs font-bold"
           >
             <History size={14} /> Histórico
           </button>
 
-          <div className="hidden md:flex items-center gap-3 pr-6 border-r border-white/10">
+          <div className="hidden md:flex items-center gap-3 pr-6 border-r border-gray-200">
             <div className="text-right">
-              <p className="text-xs font-bold text-white leading-none">{profile?.full_name || user.email}</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">{profile?.role === 'admin' ? 'Administrador' : 'Membro Premium'}</p>
+              <p className="text-xs font-bold text-black leading-none">{profile?.full_name || user.email}</p>
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-1">{profile?.role === 'admin' ? 'Administrador' : 'Membro Premium'}</p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400">
+            <div className="w-8 h-8 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-600">
               <UserIcon size={16} />
             </div>
           </div>
           
-          <div className="flex items-center gap-4 text-gray-400">
+          <div className="flex items-center gap-4 text-gray-500">
             {profile?.role === 'admin' && (
-              <button onClick={() => router.push('/admin')} className="text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors">
+              <button onClick={() => router.push('/admin')} className="text-[10px] font-bold uppercase tracking-widest hover:text-black transition-colors">
                 Admin
               </button>
             )}
-            <button onClick={signOut} className="hover:text-red-400 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+            <button onClick={signOut} className="hover:text-red-500 transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
               Sair <LogOut size={16} />
             </button>
           </div>
@@ -209,20 +209,20 @@ export default function Home() {
       <main className="flex-1 p-4 md:p-6 flex flex-col lg:flex-row-reverse gap-6 h-[calc(100vh-72px)] overflow-hidden">
         {/* History Modal */}
         {showHistory && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="glass-panel w-full max-w-2xl rounded-3xl overflow-hidden border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
-              <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
-                <h3 className="text-xl font-bold glow-text flex items-center gap-2">
-                  <History size={20} className="text-indigo-400" />
-                  Projetos Recentes
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/80 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="glass-panel w-full max-w-2xl rounded-3xl overflow-hidden border-gray-100 shadow-2xl animate-in zoom-in-95 duration-300 bg-white">
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 className="text-xl font-black text-black flex items-center gap-2">
+                  <History size={20} className="text-gray-400" />
+                  PROJETOS RECENTES
                 </h3>
-                <button onClick={() => setShowHistory(false)} className="text-gray-500 hover:text-white transition-colors">
+                <button onClick={() => setShowHistory(false)} className="text-gray-400 hover:text-black transition-colors">
                   <Check size={20} />
                 </button>
               </div>
               <div className="max-h-[60vh] overflow-y-auto p-6 custom-scrollbar">
                 {history.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
+                  <div className="text-center py-12 text-gray-400 font-medium">
                     Nenhum projeto salvo ainda.
                   </div>
                 ) : (
@@ -231,15 +231,15 @@ export default function Home() {
                       <div 
                         key={project.id} 
                         onClick={() => loadFromHistory(project)}
-                        className="bg-white/5 border border-white/10 p-4 rounded-2xl hover:bg-white/10 transition-all cursor-pointer group flex justify-between items-center"
+                        className="bg-gray-50 border border-gray-100 p-4 rounded-2xl hover:bg-white hover:border-black transition-all cursor-pointer group flex justify-between items-center"
                       >
                         <div>
-                          <h4 className="font-bold text-white group-hover:text-indigo-300 transition-colors">{project.client_name}</h4>
-                          <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">@{project.instagram} • {project.theme}</p>
+                          <h4 className="font-bold text-black group-hover:text-black transition-colors">{project.client_name}</h4>
+                          <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">@{project.instagram} • {project.theme}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[10px] text-gray-500 uppercase">{new Date(project.created_at).toLocaleDateString('pt-BR')}</p>
-                          <span className="text-[10px] text-indigo-400 font-bold uppercase mt-1 block">Carregar</span>
+                          <p className="text-[10px] text-gray-400 uppercase">{new Date(project.created_at).toLocaleDateString('pt-BR')}</p>
+                          <span className="text-[10px] text-black font-black uppercase mt-1 block tracking-tighter">Carregar</span>
                         </div>
                       </div>
                     ))}
@@ -251,33 +251,33 @@ export default function Home() {
         )}
         {/* Sidebar - Form */}
         <aside className="w-full lg:w-80 xl:w-96 flex flex-col gap-4 overflow-y-auto pr-2 shrink-0">
-          <div className="glass-panel p-6 rounded-3xl flex flex-col h-fit border-indigo-500/10">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold glow-text flex items-center gap-3">
-                <Sparkles className="text-indigo-400" size={24} />
-                Performance Social Media
+          <div className="glass-panel p-6 rounded-3xl flex flex-col h-fit border-gray-100">
+            <div className="mb-8">
+              <h1 className="text-xl font-black tracking-tighter text-black uppercase flex items-center gap-2">
+                <Sparkles className="text-gray-400" size={20} />
+                ESTRATÉGIA
               </h1>
             </div>
 
-            <form onSubmit={handleGenerate} className="flex flex-col gap-4">
+            <form onSubmit={handleGenerate} className="flex flex-col gap-5">
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Nome do Projeto/Cliente</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-2 text-gray-400">Cliente / Projeto</label>
                 <input 
                   required
                   type="text" 
-                  className="w-full input-glass rounded-xl p-2.5 text-sm" 
-                  placeholder="Nome do cliente ou marca"
+                  className="w-full input-glass rounded-xl p-3 text-sm outline-none" 
+                  placeholder="Nome do cliente"
                   value={formData.clientName}
                   onChange={(e) => setFormData({...formData, clientName: e.target.value})}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Perfil Referência (@)</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-2 text-gray-400">Perfil (@)</label>
                 <input 
                   required
                   type="text" 
-                  className="w-full input-glass rounded-xl p-2.5 text-sm" 
+                  className="w-full input-glass rounded-xl p-3 text-sm outline-none" 
                   placeholder="@usuario"
                   value={formData.instagram}
                   onChange={(e) => setFormData({...formData, instagram: e.target.value})}
@@ -285,19 +285,19 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Tema da Campanha</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-2 text-gray-400">Tema da Campanha</label>
                 <input 
                   required
                   type="text" 
-                  className="w-full input-glass rounded-xl p-2.5 text-sm" 
-                  placeholder="Ex: Ofertas de Verão"
+                  className="w-full input-glass rounded-xl p-3 text-sm outline-none" 
+                  placeholder="Ex: Lançamento de Inverno"
                   value={formData.theme}
                   onChange={(e) => setFormData({...formData, theme: e.target.value})}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Público Alvo</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-2 text-gray-400">Público Alvo</label>
                 <input 
                   required
                   type="text" 
