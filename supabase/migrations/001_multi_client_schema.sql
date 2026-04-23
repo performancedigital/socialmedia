@@ -1,9 +1,9 @@
 -- SQL para criar as tabelas do sistema multi-cliente
 -- Execute este script no SQL Editor do Supabase
+-- POLICY ERRORS SÃO NORMAIS - significa que já existem
 
 -- ============================================
 -- TABELA: clients
--- Armazena os clientes de cada usuário
 -- ============================================
 CREATE TABLE IF NOT EXISTS clients (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -20,32 +20,52 @@ CREATE TABLE IF NOT EXISTS clients (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Índices para clients
+-- Índices
 CREATE INDEX IF NOT EXISTS idx_clients_user_id ON clients(user_id);
 CREATE INDEX IF NOT EXISTS idx_clients_niche ON clients(niche);
 
--- Políticas RLS para clients
+-- RLS
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Usuários podem ver seus próprios clientes"
-    ON clients FOR SELECT
-    USING (auth.uid() = user_id);
+-- Policies (ignora erro se já existir)
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem ver seus próprios clientes"
+        ON clients FOR SELECT
+        USING (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem criar clientes"
-    ON clients FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem criar clientes"
+        ON clients FOR INSERT
+        WITH CHECK (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem atualizar seus clientes"
-    ON clients FOR UPDATE
-    USING (auth.uid() = user_id);
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem atualizar seus clientes"
+        ON clients FOR UPDATE
+        USING (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem deletar seus clientes"
-    ON clients FOR DELETE
-    USING (auth.uid() = user_id);
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem deletar seus clientes"
+        ON clients FOR DELETE
+        USING (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
 -- ============================================
 -- TABELA: ai_personas
--- Armazena as personas de IA customizadas por cliente
 -- ============================================
 CREATE TABLE IF NOT EXISTS ai_personas (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -60,55 +80,48 @@ CREATE TABLE IF NOT EXISTS ai_personas (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Índices para ai_personas
 CREATE INDEX IF NOT EXISTS idx_ai_personas_client_id ON ai_personas(client_id);
 
--- Políticas RLS para ai_personas
 ALTER TABLE ai_personas ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Usuários podem ver personas de seus clientes"
-    ON ai_personas FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = ai_personas.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem ver personas de seus clientes"
+        ON ai_personas FOR SELECT
+        USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = ai_personas.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem criar personas para seus clientes"
-    ON ai_personas FOR INSERT
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = ai_personas.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem criar personas para seus clientes"
+        ON ai_personas FOR INSERT
+        WITH CHECK (EXISTS (SELECT 1 FROM clients WHERE clients.id = ai_personas.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem atualizar personas de seus clientes"
-    ON ai_personas FOR UPDATE
-    USING (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = ai_personas.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem atualizar personas de seus clientes"
+        ON ai_personas FOR UPDATE
+        USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = ai_personas.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem deletar personas de seus clientes"
-    ON ai_personas FOR DELETE
-    USING (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = ai_personas.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem deletar personas de seus clientes"
+        ON ai_personas FOR DELETE
+        USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = ai_personas.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
 -- ============================================
 -- TABELA: content_calendar
--- Armazena os itens do calendário editorial
 -- ============================================
 CREATE TABLE IF NOT EXISTS content_calendar (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -131,58 +144,51 @@ CREATE TABLE IF NOT EXISTS content_calendar (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Índices para content_calendar
 CREATE INDEX IF NOT EXISTS idx_content_calendar_client_id ON content_calendar(client_id);
 CREATE INDEX IF NOT EXISTS idx_content_calendar_date ON content_calendar(scheduled_date);
 CREATE INDEX IF NOT EXISTS idx_content_calendar_status ON content_calendar(status);
 CREATE INDEX IF NOT EXISTS idx_content_calendar_funnel ON content_calendar(funnel_stage);
 
--- Políticas RLS para content_calendar
 ALTER TABLE content_calendar ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Usuários podem ver calendário de seus clientes"
-    ON content_calendar FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = content_calendar.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem ver calendário de seus clientes"
+        ON content_calendar FOR SELECT
+        USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = content_calendar.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem criar itens no calendário de seus clientes"
-    ON content_calendar FOR INSERT
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = content_calendar.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem criar itens no calendário de seus clientes"
+        ON content_calendar FOR INSERT
+        WITH CHECK (EXISTS (SELECT 1 FROM clients WHERE clients.id = content_calendar.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem atualizar calendário de seus clientes"
-    ON content_calendar FOR UPDATE
-    USING (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = content_calendar.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem atualizar calendário de seus clientes"
+        ON content_calendar FOR UPDATE
+        USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = content_calendar.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem deletar itens do calendário de seus clientes"
-    ON content_calendar FOR DELETE
-    USING (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = content_calendar.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem deletar itens do calendário de seus clientes"
+        ON content_calendar FOR DELETE
+        USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = content_calendar.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
 -- ============================================
 -- TABELA: backlog_items
--- Armazena posts pendentes/backlog
 -- ============================================
 CREATE TABLE IF NOT EXISTS backlog_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -203,59 +209,52 @@ CREATE TABLE IF NOT EXISTS backlog_items (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Índices para backlog_items
 CREATE INDEX IF NOT EXISTS idx_backlog_client_id ON backlog_items(client_id);
 CREATE INDEX IF NOT EXISTS idx_backlog_status ON backlog_items(status);
 CREATE INDEX IF NOT EXISTS idx_backlog_priority ON backlog_items(priority);
 
--- Políticas RLS para backlog_items
 ALTER TABLE backlog_items ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Usuários podem ver backlog de seus clientes"
-    ON backlog_items FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = backlog_items.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem ver backlog de seus clientes"
+        ON backlog_items FOR SELECT
+        USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = backlog_items.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem criar itens no backlog de seus clientes"
-    ON backlog_items FOR INSERT
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = backlog_items.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem criar itens no backlog de seus clientes"
+        ON backlog_items FOR INSERT
+        WITH CHECK (EXISTS (SELECT 1 FROM clients WHERE clients.id = backlog_items.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem atualizar backlog de seus clientes"
-    ON backlog_items FOR UPDATE
-    USING (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = backlog_items.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem atualizar backlog de seus clientes"
+        ON backlog_items FOR UPDATE
+        USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = backlog_items.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
-CREATE POLICY "Usuários podem deletar itens do backlog de seus clientes"
-    ON backlog_items FOR DELETE
-    USING (
-        EXISTS (
-            SELECT 1 FROM clients 
-            WHERE clients.id = backlog_items.client_id 
-            AND clients.user_id = auth.uid()
-        )
-    );
+DO $$
+BEGIN
+    CREATE POLICY "Usuários podem deletar itens do backlog de seus clientes"
+        ON backlog_items FOR DELETE
+        USING (EXISTS (SELECT 1 FROM clients WHERE clients.id = backlog_items.client_id AND clients.user_id = auth.uid()));
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy já existe';
+END $$;
 
 -- ============================================
--- FUNÇÕES AUXILIARES
+-- FUNÇÕES E TRIGGERS
 -- ============================================
 
--- Função para atualizar updated_at automaticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -264,23 +263,43 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Triggers para atualizar updated_at
-CREATE TRIGGER update_clients_updated_at BEFORE UPDATE ON clients
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Triggers (ignora erro se já existir)
+DO $$
+BEGIN
+    CREATE TRIGGER update_clients_updated_at BEFORE UPDATE ON clients
+        FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Trigger já existe';
+END $$;
 
-CREATE TRIGGER update_ai_personas_updated_at BEFORE UPDATE ON ai_personas
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DO $$
+BEGIN
+    CREATE TRIGGER update_ai_personas_updated_at BEFORE UPDATE ON ai_personas
+        FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Trigger já existe';
+END $$;
 
-CREATE TRIGGER update_content_calendar_updated_at BEFORE UPDATE ON content_calendar
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DO $$
+BEGIN
+    CREATE TRIGGER update_content_calendar_updated_at BEFORE UPDATE ON content_calendar
+        FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Trigger já existe';
+END $$;
 
-CREATE TRIGGER update_backlog_items_updated_at BEFORE UPDATE ON backlog_items
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DO $$
+BEGIN
+    CREATE TRIGGER update_backlog_items_updated_at BEFORE UPDATE ON backlog_items
+        FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Trigger já existe';
+END $$;
 
 -- ============================================
--- VIEW: calendar_with_client
--- Facilita consultas ao calendário com dados do cliente
+-- VIEWS
 -- ============================================
+
 CREATE OR REPLACE VIEW calendar_with_client AS
 SELECT 
     cc.*,
@@ -291,10 +310,6 @@ SELECT
 FROM content_calendar cc
 JOIN clients c ON cc.client_id = c.id;
 
--- ============================================
--- VIEW: backlog_with_client
--- Facilita consultas ao backlog com dados do cliente
--- ============================================
 CREATE OR REPLACE VIEW backlog_with_client AS
 SELECT 
     bi.*,
