@@ -53,12 +53,22 @@ export default function Home() {
   }, [user, authLoading, router]);
 
   const fetchHistory = async () => {
-    const { data } = await supabase
-      .from('projects')
-      .select('*, content_generations(*)')
-      .order('created_at', { ascending: false })
-      .limit(10);
-    setHistory(data || []);
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*, content_generations(*)')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (error) {
+        console.warn('Tabela projects nao encontrada:', error.message);
+        setHistory([]);
+        return;
+      }
+      setHistory(data || []);
+    } catch (err) {
+      console.warn('Erro ao buscar historico:', err);
+      setHistory([]);
+    }
   };
 
   const loadFromHistory = (project: any) => {
@@ -136,29 +146,34 @@ export default function Home() {
       if (data.error) throw new Error(data.error);
       setResult(data);
 
+      // Salva historico (ignora erro se tabela nao existir)
       if (user) {
-        const { data: project } = await supabase
-          .from('projects')
-          .insert([{
-            user_id: user.id,
-            client_name: formData.clientName,
-            instagram: formData.instagram,
-            theme: formData.theme,
-            target_audience: formData.targetAudience,
-            days: formData.days
-          }])
-          .select()
-          .single();
-
-        if (project) {
-          await supabase
-            .from('content_generations')
+        try {
+          const { data: project } = await supabase
+            .from('projects')
             .insert([{
-              project_id: project.id,
               user_id: user.id,
-              content: data
-            }]);
-          fetchHistory();
+              client_name: formData.clientName,
+              instagram: formData.instagram,
+              theme: formData.theme,
+              target_audience: formData.targetAudience,
+              days: formData.days
+            }])
+            .select()
+            .single();
+
+          if (project) {
+            await supabase
+              .from('content_generations')
+              .insert([{
+                project_id: project.id,
+                user_id: user.id,
+                content: data
+              }]);
+            fetchHistory();
+          }
+        } catch (saveErr) {
+          console.warn('Erro ao salvar historico (ignorado):', saveErr);
         }
       }
     } catch (err: any) {
