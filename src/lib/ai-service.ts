@@ -33,7 +33,7 @@ export async function enlargePrompt(input: { theme: string, clientName: string, 
   `;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -42,6 +42,29 @@ export async function enlargePrompt(input: { theme: string, clientName: string, 
       })
     });
     const data = await response.json();
+
+    if (data.error) {
+      console.warn("Gemini Enlarger falhou. Tentando OpenAI Fallback...");
+      const openAiKey = process.env.OPENAI_API_KEY;
+      if (openAiKey) {
+        const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openAiKey}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [{ role: 'user', content: enlargementPrompt }],
+            response_format: { type: "json_object" }
+          })
+        });
+        const aiData = await aiResponse.json();
+        return JSON.parse(aiData.choices[0].message.content);
+      }
+      throw new Error(data.error.message);
+    }
+
     return JSON.parse(data.candidates[0].content.parts[0].text);
   } catch (error) {
     console.error("Error enlarging prompt:", error);

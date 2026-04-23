@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o', // Tenta gpt-4o primeiro
         messages: [
           {
             role: 'system',
@@ -41,9 +41,16 @@ export async function POST(request: Request) {
     });
 
     const data = await response.json();
+
+    if (data.error) {
+      console.error('OpenAI Error:', data.error);
+      return NextResponse.json({ error: data.error.message }, { status: response.status });
+    }
+
     return NextResponse.json(data);
 
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Chat API Route Error:', error);
+    return NextResponse.json({ error: 'Erro interno no servidor de chat.' }, { status: 500 });
   }
 }

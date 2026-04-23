@@ -36,11 +36,17 @@ export default function ChatPanel({ onApplyData }: { onApplyData: (data: any) =>
       });
       const data = await res.json();
       
+      if (data.error) {
+        setMessages([...newMessages, { role: "assistant", content: `❌ Erro: ${data.error}` }]);
+        return;
+      }
+
       if (data.choices?.[0]?.message) {
         setMessages([...newMessages, data.choices[0].message]);
       }
     } catch (error) {
       console.error("Chat error:", error);
+      setMessages([...newMessages, { role: "assistant", content: "❌ Falha crítica na conexão com o servidor de chat." }]);
     } finally {
       setLoading(false);
     }

@@ -1,21 +1,15 @@
 /**
  * @file page.tsx
  * @description Componente principal da aplicação NexusCopy. 
- * Contém a interface de usuário (UI) para configuração do gerador de copys
- * e a exibição de resultados em abas (Cronograma, Estáticos e Carrosséis).
+ * Interface profissional para geração de estratégias e copys de redes sociais.
  */
 
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Calendar, Image as ImageIcon, Layers, Loader2, Send, MessageSquare, Users, Settings } from "lucide-react";
+import { Sparkles, Calendar, Image as ImageIcon, Layers, Loader2, Send, MessageSquare, Settings, Zap } from "lucide-react";
 import ChatPanel from "./components/ChatPanel";
 
-/**
- * Componente `Home` renderiza o dashboard completo.
- * Gerencia o estado do formulário, o estado de carregamento e armazena
- * os resultados da API para exibição dinâmica.
- */
 export default function Home() {
   const [formData, setFormData] = useState({
     clientName: "",
@@ -41,8 +35,8 @@ export default function Home() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setResult(data);
-    } catch (err) {
-      alert("Erro ao gerar copys. Verifique o console.");
+    } catch (err: any) {
+      alert(`Erro: ${err.message}`);
       console.error(err);
     } finally {
       setLoading(false);
@@ -51,20 +45,20 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0a0a0f]">
-      {/* Multi-tenant Header */}
+      {/* Professional Header */}
       <header className="glass-panel border-b border-white/10 px-8 py-4 flex justify-between items-center bg-black/40 shrink-0">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
-            P
+            N
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-white">Performance Digital</h2>
-            <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-bold">Workspace Master</p>
+            <h2 className="text-sm font-semibold text-white">NexusCopy SaaS</h2>
+            <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-bold">Painel de Controle</p>
           </div>
         </div>
         <div className="flex items-center gap-6 text-gray-400">
           <div className="hidden md:flex items-center gap-2 text-xs border border-white/5 bg-white/5 px-3 py-1.5 rounded-full">
-            <Users size={14} /> 5 Clientes Ativos
+            <Zap size={14} className="text-yellow-500" /> API Status: Ativo
           </div>
           <Settings size={18} className="hover:text-white cursor-pointer transition-colors" />
         </div>
@@ -73,7 +67,7 @@ export default function Home() {
       <main className="flex-1 p-4 md:p-6 flex flex-col lg:flex-row gap-6 h-[calc(100vh-72px)] overflow-hidden">
         {/* Sidebar - Form */}
         <aside className="w-full lg:w-80 xl:w-96 flex flex-col gap-4 overflow-y-auto pr-2 shrink-0">
-          <div className="glass-panel p-6 rounded-3xl flex flex-col h-fit">
+          <div className="glass-panel p-6 rounded-3xl flex flex-col h-fit border-indigo-500/10">
             <div className="mb-6">
               <h1 className="text-2xl font-bold glow-text flex items-center gap-3">
                 <Sparkles className="text-indigo-400" size={24} />
@@ -83,36 +77,36 @@ export default function Home() {
 
             <form onSubmit={handleGenerate} className="flex flex-col gap-4">
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Nome do Cliente</label>
+                <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Nome do Projeto/Cliente</label>
                 <input 
                   required
                   type="text" 
                   className="w-full input-glass rounded-xl p-2.5 text-sm" 
-                  placeholder="Ex: Xikita Moda"
+                  placeholder="Nome do cliente ou marca"
                   value={formData.clientName}
                   onChange={(e) => setFormData({...formData, clientName: e.target.value})}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Instagram (@)</label>
+                <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Perfil Referência (@)</label>
                 <input 
                   required
                   type="text" 
                   className="w-full input-glass rounded-xl p-2.5 text-sm" 
-                  placeholder="Ex: @xikita.oficial"
+                  placeholder="@usuario"
                   value={formData.instagram}
                   onChange={(e) => setFormData({...formData, instagram: e.target.value})}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Tema do Mês</label>
+                <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Tema da Campanha</label>
                 <input 
                   required
                   type="text" 
                   className="w-full input-glass rounded-xl p-2.5 text-sm" 
-                  placeholder="Ex: Lançamento Inverno"
+                  placeholder="Ex: Ofertas de Verão"
                   value={formData.theme}
                   onChange={(e) => setFormData({...formData, theme: e.target.value})}
                 />
@@ -124,7 +118,7 @@ export default function Home() {
                   required
                   type="text" 
                   className="w-full input-glass rounded-xl p-2.5 text-sm" 
-                  placeholder="Ex: Mulheres de 25-45"
+                  placeholder="Quem deve ver os posts?"
                   value={formData.targetAudience}
                   onChange={(e) => setFormData({...formData, targetAudience: e.target.value})}
                 />
@@ -160,9 +154,14 @@ export default function Home() {
                 className="btn-primary mt-2 rounded-xl p-3 flex justify-center items-center gap-2 text-sm font-bold"
               >
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
-                {loading ? "Sintetizando..." : "Gerar Estratégia"}
+                {loading ? "Sintetizando..." : "Gerar Mês Completo"}
               </button>
             </form>
+          </div>
+          
+          <div className="glass-panel p-4 rounded-2xl flex flex-col gap-2 border-purple-500/10">
+            <h3 className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Nano Banana Engine</h3>
+            <p className="text-[11px] text-gray-500">Modelo de geração de imagens do Google Studio ativo para prompts visuais.</p>
           </div>
         </aside>
 
@@ -173,7 +172,7 @@ export default function Home() {
               <Sparkles size={48} className="mb-4 text-indigo-500 animate-pulse" />
               <h2 className="text-xl font-semibold mb-2">Pronto para a Mágica?</h2>
               <p className="max-w-sm text-sm text-gray-400">
-                Preencha os dados ao lado ou use o Estratégista AI para refinar sua campanha antes de gerar.
+                Configure os detalhes da sua campanha ao lado para gerar 30 dias de conteúdo extraordinário.
               </p>
             </div>
           )}
@@ -181,9 +180,9 @@ export default function Home() {
           {loading && (
             <div className="flex-1 flex flex-col items-center justify-center text-center">
               <Loader2 size={48} className="mb-4 text-indigo-500 animate-spin" />
-              <h2 className="text-xl font-semibold mb-2 animate-pulse glow-text">Criando Conteúdo...</h2>
+              <h2 className="text-xl font-semibold mb-2 animate-pulse glow-text">Construindo Estratégia...</h2>
               <p className="max-w-sm text-sm text-gray-400">
-                Estamos gerando sua estratégia extraordinária.
+                Refinando temas e gerando prompts de imagem realistas.
               </p>
             </div>
           )}
@@ -240,17 +239,20 @@ export default function Home() {
                         <h3 className="text-lg font-bold text-white mb-4 glow-text">{post.title}</h3>
                         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                           <div>
-                            <h4 className="text-[10px] uppercase tracking-tighter text-indigo-400 font-black mb-2">Legenda</h4>
+                            <h4 className="text-[10px] uppercase tracking-tighter text-indigo-400 font-black mb-2">Legenda Estratégica</h4>
                             <div className="bg-black/20 p-4 rounded-2xl border border-white/5 text-xs text-gray-300 leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto">
                               {post.caption}
                               <div className="mt-4 text-indigo-300/60">{post.hashtags}</div>
                             </div>
                           </div>
                           <div>
-                            <h4 className="text-[10px] uppercase tracking-tighter text-purple-400 font-black mb-2">Prompt Visual</h4>
+                            <h4 className="text-[10px] uppercase tracking-tighter text-purple-400 font-black mb-2">Prompt Visual (Nano Banana)</h4>
                             <div className="bg-purple-500/5 p-4 rounded-2xl border border-purple-500/10 text-[11px] font-mono text-purple-200/70 leading-relaxed max-h-40 overflow-y-auto">
                               {post.imagePrompt}
                             </div>
+                            <button className="w-full mt-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-[10px] font-bold py-2 rounded-xl border border-purple-500/20 transition-all uppercase tracking-widest">
+                              Gerar Imagem Agora
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -277,7 +279,7 @@ export default function Home() {
                         </div>
 
                         <div className="bg-black/20 p-4 rounded-2xl border border-white/5">
-                          <h4 className="text-[10px] uppercase font-black text-indigo-400 mb-2 text-center">Legenda</h4>
+                          <h4 className="text-[10px] uppercase font-black text-indigo-400 mb-2 text-center">Legenda do Carrossel</h4>
                           <p className="text-xs text-gray-300 leading-relaxed text-center">{carousel.caption}</p>
                         </div>
                       </div>

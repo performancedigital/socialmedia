@@ -79,30 +79,47 @@ Você deve responder ESTRITAMENTE no seguinte formato JSON (e nada mais, sem mar
   ]
 }`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: systemPrompt }
-            ]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          responseMimeType: "application/json",
-        }
-      })
-    });
+    // Tenta primeiro com Gemini
+    let data;
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: systemPrompt }] }],
+          generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
+        })
+      });
+      data = await response.json();
+    } catch (err) {
+      console.error('Gemini Fetch Error:', err);
+    }
 
-    const data = await response.json();
-    
-    if (data.error) {
-      throw new Error(data.error.message || 'Error from Gemini API');
+    // Fallback para OpenAI se o Gemini falhar (ex: chave bloqueada/leaked)
+    if (!data || data.error) {
+      console.warn('Gemini falhou ou chave bloqueada. Tentando fallback com OpenAI...');
+      const openAiKey = process.env.OPENAI_API_KEY;
+      if (openAiKey) {
+        const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${openAiKey}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [{ role: 'user', content: systemPrompt }],
+            response_format: { type: "json_object" }
+          })
+        });
+        const aiData = await aiResponse.json();
+        if (aiData.choices?.[0]?.message?.content) {
+          return NextResponse.json(JSON.parse(aiData.choices[0].message.content));
+        }
+      }
+      
+      // Se nem o fallback funcionar, retorna o erro original do Gemini
+      throw new Error(data?.error?.message || 'Falha na geração (Gemini & OpenAI indisponíveis)');
     }
 
     const textOutput = data.candidates[0].content.parts[0].text;
@@ -111,7 +128,6 @@ Você deve responder ESTRITAMENTE no seguinte formato JSON (e nada mais, sem mar
     try {
       parsedData = JSON.parse(textOutput);
     } catch (e) {
-      // Cleanup possible markdown formatting
       const cleanText = textOutput.replace(/```json/g, '').replace(/```/g, '').trim();
       parsedData = JSON.parse(cleanText);
     }
