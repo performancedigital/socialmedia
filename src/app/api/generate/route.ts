@@ -1,5 +1,27 @@
+/**
+ * @file route.ts
+ * @description Esta rota da API (Next.js App Router) é responsável por receber os dados do formulário
+ * do painel NexusCopy e se comunicar com a API do Google Gemini para gerar o conteúdo das redes sociais.
+ * A rota atua como um intermediário seguro, garantindo que as chaves da API não sejam expostas ao cliente (frontend).
+ */
+
 import { NextResponse } from 'next/server';
 
+/**
+ * Lida com as requisições POST para gerar copys usando Inteligência Artificial.
+ * 
+ * @param {Request} request - O objeto de requisição recebido do cliente.
+ * 
+ * Espera-se que o corpo (body) da requisição seja um JSON contendo:
+ * - `theme` (string): O tema principal da campanha.
+ * - `clientName` (string): O nome da empresa/cliente.
+ * - `instagram` (string): O @ do instagram ou contexto do perfil.
+ * - `days` (number/string): A quantidade de dias para o cronograma.
+ * - `targetAudience` (string): O público alvo da campanha.
+ * 
+ * @returns {NextResponse} Uma resposta JSON contendo o objeto de copys geradas
+ * (`schedule`, `staticPosts`, `carousels`) ou um objeto de erro com status 500.
+ */
 export async function POST(request: Request) {
   try {
     const body = await request.json();

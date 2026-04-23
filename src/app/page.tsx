@@ -1,8 +1,20 @@
+/**
+ * @file page.tsx
+ * @description Componente principal da aplicação NexusCopy. 
+ * Contém a interface de usuário (UI) para configuração do gerador de copys
+ * e a exibição de resultados em abas (Cronograma, Estáticos e Carrosséis).
+ */
+
 "use client";
 
 import { useState } from "react";
 import { Sparkles, Calendar, Image as ImageIcon, Layers, Loader2, Send } from "lucide-react";
 
+/**
+ * Componente `Home` renderiza o dashboard completo.
+ * Gerencia o estado do formulário, o estado de carregamento e armazena
+ * os resultados da API para exibição dinâmica.
+ */
 export default function Home() {
   const [formData, setFormData] = useState({
     clientName: "",
