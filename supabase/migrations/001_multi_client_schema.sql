@@ -300,3 +300,157 @@ DROP VIEW IF EXISTS backlog_with_client;
 
 -- Nao criamos views com security definer para evitar os warnings
 -- As queries podem ser feitas diretamente nas tabelas com JOIN
+
+-- ============================================
+-- TABELA: profiles (extensão do auth.users)
+-- ============================================
+CREATE TABLE IF NOT EXISTS profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    full_name TEXT,
+    role TEXT DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    is_blocked BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
+
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    CREATE POLICY "Usuarios podem ver seu proprio perfil"
+        ON profiles FOR SELECT
+        USING (auth.uid() = id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy ja existe';
+END $$;
+
+DO $$
+BEGIN
+    CREATE POLICY "Usuarios podem atualizar seu proprio perfil"
+        ON profiles FOR UPDATE
+        USING (auth.uid() = id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy ja existe';
+END $$;
+
+-- Trigger para criar perfil automaticamente
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, full_name, role)
+    VALUES (
+        NEW.id,
+        NEW.raw_user_meta_data->>'full_name',
+        COALESCE(NEW.raw_user_meta_data->>'role', 'user')
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DO $$
+BEGIN
+    CREATE TRIGGER on_auth_user_created
+        AFTER INSERT ON auth.users
+        FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Trigger ja existe';
+END $$;
+
+DO $$
+BEGIN
+    CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles
+        FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Trigger ja existe';
+END $$;
+
+-- ============================================
+-- TABELA: projects (projetos/histórico)
+-- ============================================
+CREATE TABLE IF NOT EXISTS projects (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    client_name TEXT NOT NULL,
+    instagram TEXT,
+    theme TEXT,
+    target_audience TEXT,
+    days INTEGER DEFAULT 30,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
+CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at);
+
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    CREATE POLICY "Usuarios podem ver seus proprios projetos"
+        ON projects FOR SELECT
+        USING (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy ja existe';
+END $$;
+
+DO $$
+BEGIN
+    CREATE POLICY "Usuarios podem criar projetos"
+        ON projects FOR INSERT
+        WITH CHECK (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy ja existe';
+END $$;
+
+DO $$
+BEGIN
+    CREATE POLICY "Usuarios podem deletar seus proprios projetos"
+        ON projects FOR DELETE
+        USING (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy ja existe';
+END $$;
+
+DO $$
+BEGIN
+    CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects
+        FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Trigger ja existe';
+END $$;
+
+-- ============================================
+-- TABELA: content_generations (gerações de conteúdo)
+-- ============================================
+CREATE TABLE IF NOT EXISTS content_generations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    content JSONB NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_content_generations_project_id ON content_generations(project_id);
+CREATE INDEX IF NOT EXISTS idx_content_generations_user_id ON content_generations(user_id);
+
+ALTER TABLE content_generations ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+    CREATE POLICY "Usuarios podem ver suas proprias geracoes"
+        ON content_generations FOR SELECT
+        USING (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy ja existe';
+END $$;
+
+DO $$
+BEGIN
+    CREATE POLICY "Usuarios podem criar geracoes"
+        ON content_generations FOR INSERT
+        WITH CHECK (auth.uid() = user_id);
+EXCEPTION WHEN duplicate_object THEN
+    RAISE NOTICE 'Policy ja existe';
+END $$;

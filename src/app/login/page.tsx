@@ -105,7 +105,7 @@ export default function LoginPage() {
               <div className="flex justify-between items-center mb-3">
                 <label className="block text-[11px] uppercase tracking-widest font-black text-black">Senha</label>
                 {isLogin && (
-                  <Link href="/forgot-password" core-size={16} className="text-[11px] text-[#ff5500] hover:underline font-black uppercase tracking-widest">
+                  <Link href="/forgot-password" className="text-[11px] text-[#ff5500] hover:underline font-black uppercase tracking-widest">
                     Esqueceu?
                   </Link>
                 )}

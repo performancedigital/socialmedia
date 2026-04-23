@@ -81,6 +81,12 @@ Usuário → Next.js → API Routes → Supabase
 - Calendário editorial com funil
 - Interface de gestão de clientes
 
+### Fase 3: Correções e Melhorias (v0.2.1)
+**Commits:**
+- Correção do erro `core-size` no componente Link
+- Adição da página de configurações do cliente
+- Atualização do SQL com tabelas faltantes (profiles, projects, content_generations)
+
 ---
 
 ## Problemas e Soluções
@@ -92,7 +98,14 @@ Usuário → Next.js → API Routes → Supabase
 
 **Solução:**
 1. Executar SQL de migração: `supabase/migrations/001_multi_client_schema.sql`
-2. Verificar em Table Editor se as 4 tabelas existem
+2. Verificar em Table Editor se as 7 tabelas existem:
+   - `clients`
+   - `ai_personas`
+   - `content_calendar`
+   - `backlog_items`
+   - `profiles`
+   - `projects`
+   - `content_generations`
 
 ### Problema 2: SQL - Policy Already Exists
 **Sintoma:** `ERROR: 42710: policy "..." already exists`
@@ -127,6 +140,27 @@ Usuário → Next.js → API Routes → Supabase
 
 **Solução:** Substituir `Instagram` por `AtSign` do lucide-react
 
+### Problema 7: Link com atributo inválido (CORRIGIDO v0.2.1)
+**Sintoma:** Erro de compilação no login
+
+**Causa:** Atributo `core-size={16}` no componente `Link` do Next.js
+
+**Solução:** Remover atributo inválido em `src/app/login/page.tsx`
+
+### Problema 8: Página de configurações não existe (CORRIGIDO v0.2.1)
+**Sintoma:** Erro 404 ao clicar em "Configurações" no ClientSelector
+
+**Causa:** Referência a `/clients/[id]/settings` sem a página existir
+
+**Solução:** Criar página `src/app/clients/[id]/settings/page.tsx`
+
+### Problema 9: Tabelas faltantes no SQL (CORRIGIDO v0.2.1)
+**Sintoma:** Erros ao buscar dados de perfil e histórico
+
+**Causa:** Tabelas `profiles`, `projects` e `content_generations` não estavam no SQL
+
+**Solução:** Adicionar tabelas ao arquivo de migração SQL
+
 ---
 
 ## Guia de Instalação
@@ -152,7 +186,14 @@ OPENAI_API_KEY=sua-chave-openai
 2. Vá em SQL Editor
 3. Cole o conteúdo de `supabase/migrations/001_multi_client_schema.sql`
 4. Clique em Run
-5. Verifique em Table Editor se as tabelas foram criadas
+5. Verifique em Table Editor se as 7 tabelas foram criadas:
+   - clients
+   - ai_personas
+   - content_calendar
+   - backlog_items
+   - profiles
+   - projects
+   - content_generations
 
 ### 4. Verificação
 Rode este SQL para confirmar:
@@ -160,10 +201,10 @@ Rode este SQL para confirmar:
 SELECT table_name 
 FROM information_schema.tables 
 WHERE table_schema = 'public' 
-AND table_name IN ('clients', 'ai_personas', 'content_calendar', 'backlog_items');
+AND table_name IN ('clients', 'ai_personas', 'content_calendar', 'backlog_items', 'profiles', 'projects', 'content_generations');
 ```
 
-Deve retornar 4 linhas.
+Deve retornar 7 linhas.
 
 ### 5. Rodar Local
 ```bash
@@ -191,17 +232,25 @@ socialmedia/
 │   │   │   └── image/route.ts
 │   │   ├── backlog/page.tsx
 │   │   ├── clients/
+│   │   │   ├── [id]/
+│   │   │   │   └── settings/page.tsx
 │   │   │   ├── new/page.tsx
 │   │   │   └── page.tsx
 │   │   ├── components/
 │   │   │   ├── ChatPanel.tsx
 │   │   │   └── ClientSelector.tsx
+│   │   ├── admin/page.tsx
+│   │   ├── forgot-password/page.tsx
+│   │   ├── login/page.tsx
+│   │   ├── reset-password/page.tsx
 │   │   ├── layout.tsx
+│   │   ├── globals.css
 │   │   └── page.tsx
 │   ├── lib/
 │   │   ├── ai/
 │   │   │   ├── personas.ts
 │   │   │   └── service.ts
+│   │   ├── ai-service.ts
 │   │   ├── auth-context.tsx
 │   │   ├── client-context.tsx
 │   │   └── supabase.ts
@@ -213,6 +262,7 @@ socialmedia/
 │   └── migrations/
 │       ├── 001_multi_client_schema.sql
 │       └── verify_tables.sql
+├── DOCUMENTATION_COMPLETE.md
 ├── DOCUMENTATION.md
 ├── USER_GUIDE.md
 ├── TROUBLESHOOTING.md
@@ -268,6 +318,12 @@ Chat com IA especialista.
 }
 ```
 
+### POST /api/generate
+Gera cronograma de conteúdo (legado).
+
+### POST /api/image
+Gera imagens usando DALL-E 3.
+
 ---
 
 ## Modelo de Dados
@@ -314,6 +370,32 @@ Chat com IA especialista.
 | title | TEXT | Título |
 | priority | ENUM | baixa, media, alta, urgente |
 | status | ENUM | pendente, em_producao, pronto |
+
+### profiles
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | UUID | PK (FK auth.users) |
+| full_name | TEXT | Nome completo |
+| role | TEXT | user/admin |
+| is_blocked | BOOLEAN | Status do usuário |
+
+### projects
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | UUID | PK |
+| user_id | UUID | FK auth.users |
+| client_name | TEXT | Nome do cliente |
+| instagram | TEXT | @instagram |
+| theme | TEXT | Tema da campanha |
+| days | INTEGER | Dias do cronograma |
+
+### content_generations
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | UUID | PK |
+| project_id | UUID | FK projects |
+| user_id | UUID | FK auth.users |
+| content | JSONB | Conteúdo gerado |
 
 ---
 
@@ -381,7 +463,7 @@ npm run lint
 ## Checklist de Funcionamento
 
 - [ ] SQL executado no Supabase
-- [ ] Tabelas criadas (4 tabelas)
+- [ ] Tabelas criadas (7 tabelas)
 - [ ] Variáveis de ambiente configuradas
 - [ ] Deploy realizado
 - [ ] Login funciona
@@ -389,6 +471,8 @@ npm run lint
 - [ ] Backlog funciona
 - [ ] Chat responde
 - [ ] Calendário gera conteúdo
+- [ ] Configurações do cliente funcionam
+- [ ] Histórico de projetos salva
 
 ---
 
@@ -401,5 +485,5 @@ npm run lint
 ---
 
 **Última atualização:** 23/04/2026
-**Versão:** 0.2.0
+**Versão:** 0.2.1
 **Status:** Em produção
