@@ -6,6 +6,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { enlargePrompt } from '@/lib/ai-service';
 
 /**
  * Lida com as requisições POST para gerar copys usando Inteligência Artificial.
@@ -27,6 +28,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { theme, clientName, instagram, days, targetAudience } = body;
 
+    // Etapa de Enriquecimento (Prompt Engineering Automatizado)
+    const enrichedData = await enlargePrompt({ theme, clientName, targetAudience });
+    
+    const finalAudience = enrichedData?.expandedAudience || targetAudience;
+    const finalTheme = enrichedData?.expandedTheme || theme;
+    const visualMood = enrichedData?.visualStyle || "Premium, Professional, Instagram Optimized";
+
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'API Key not configured' }, { status: 500 });
@@ -36,8 +44,9 @@ export async function POST(request: Request) {
 Aja como uma ferramenta que cria 1 mês de conteúdo hiper-qualificado em segundos.
 Cliente: ${clientName}
 Instagram (Contexto): ${instagram}
-Tema Principal: ${theme}
-Público Alvo: ${targetAudience}
+Tema Expandido: ${finalTheme}
+Persona Detalhada: ${finalAudience}
+Estilo Visual Requerido: ${visualMood}
 Dias de Cronograma: ${days}
 
 Crie um cronograma extraordinário com:
@@ -66,7 +75,7 @@ Você deve responder ESTRITAMENTE no seguinte formato JSON (e nada mais, sem mar
   ]
 }`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

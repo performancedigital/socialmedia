@@ -1,0 +1,62 @@
+const apiKey = "AIzaSyAv-tZKxFvUgsWyDwR7H4fH36LhhcmB-qA";
+
+const systemPrompt = `Você é um estrategista de conteúdo sênior e copywriter extraordinário para Instagram.
+Aja como uma ferramenta que cria 1 mês de conteúdo hiper-qualificado em segundos.
+Cliente: Xikita
+Instagram (Contexto): @xikita
+Tema Principal: Teste
+Público Alvo: Mães
+Dias de Cronograma: 5
+
+Crie um cronograma extraordinário com:
+1. Copys para posts estáticos (imagem única) focados em conversão e engajamento.
+2. Copys para Carrosséis (separados por slide: Hook, Retenção, CTA).
+3. Um cronograma dia a dia sugerindo quando postar cada conteúdo.
+4. Prompts ultra-realistas em inglês (estilo Midjourney/DALL-E) para gerar as imagens de cada post.
+
+Você deve responder ESTRITAMENTE no seguinte formato JSON (e nada mais, sem markdown, apenas o JSON válido):
+{
+  "schedule": [
+    { "day": 1, "format": "Static ou Carousel", "theme": "...", "objective": "..." }
+  ],
+  "staticPosts": [
+    { "title": "...", "caption": "...", "hashtags": "...", "imagePrompt": "..." }
+  ],
+  "carousels": [
+    { 
+      "topic": "...",
+      "slides": [
+        { "slideNumber": 1, "text": "...", "visualContext": "..." }
+      ],
+      "caption": "...",
+      "hashtags": "..."
+    }
+  ]
+}`;
+
+async function test() {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [
+            { text: systemPrompt }
+          ]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        responseMimeType: "application/json",
+      }
+    })
+  });
+
+  const data = await response.json();
+  console.log(JSON.stringify(data, null, 2));
+}
+
+test();
