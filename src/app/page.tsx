@@ -1,5 +1,6 @@
- * @description Componente principal da aplicação Performance Social Media. 
-* @description Componente principal da aplicação Performance Social Media. 
+/**
+ * @file page.tsx
+ * @description Componente principal da aplicação Performance Social Media.
  * Interface profissional para geração de estratégias e copys de redes sociais.
  */
 

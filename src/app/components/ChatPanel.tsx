@@ -1,3 +1,5 @@
+/**
+ * @file ChatPanel.tsx
  * @description Componente de interface de chat para o Estrategista Performance Social Media.
  * Permite que o usuário faça brainstorming de campanhas com a IA.
  */
