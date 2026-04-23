@@ -164,14 +164,21 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Professional Header */}
-      <header className="glass-panel px-8 py-4 flex justify-between items-center shrink-0 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-black flex items-center justify-center rounded-md">
-            <div className="w-4 h-4 border-2 border-white transform rotate-45"></div>
+      <header className="glass-panel px-8 py-4 flex justify-between items-center shrink-0 border-b-2 border-gray-100 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="relative w-12 h-12 bg-black flex items-center justify-center rounded-xl shadow-lg transform hover:rotate-3 transition-transform">
+            {/* Brand Icon SVG - Styled based on user image */}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
+              <path d="M4 4H20V20H4V4Z" stroke="currentColor" strokeWidth="2.5" />
+              <path d="M4 12H16V20" stroke="currentColor" strokeWidth="2.5" />
+              <path d="M12 4V12" stroke="currentColor" strokeWidth="2.5" />
+            </svg>
           </div>
           <div>
-            <h2 className="text-sm font-black tracking-tighter text-black uppercase">Performance <span className="font-light">Digital</span></h2>
-            <p className="text-[9px] text-gray-400 uppercase tracking-[0.2em] font-medium leading-none">Social Media Expert</p>
+            <h2 className="text-lg font-black tracking-tighter text-black uppercase leading-none">
+              Performance <span className="text-[#ff5500]">Digital</span>
+            </h2>
+            <p className="text-[10px] text-gray-500 uppercase tracking-[0.3em] font-bold mt-1">Growth & Intelligence</p>
           </div>
         </div>
         
@@ -251,21 +258,22 @@ export default function Home() {
         )}
         {/* Sidebar - Form */}
         <aside className="w-full lg:w-80 xl:w-96 flex flex-col gap-4 overflow-y-auto pr-2 shrink-0">
-          <div className="glass-panel p-6 rounded-3xl flex flex-col h-fit border-gray-100">
-            <div className="mb-8">
-              <h1 className="text-xl font-black tracking-tighter text-black uppercase flex items-center gap-2">
-                <Sparkles className="text-gray-400" size={20} />
+          <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col h-fit border-2 border-gray-100 shadow-xl bg-white">
+            <div className="mb-10">
+              <h1 className="text-2xl font-black tracking-tighter text-black uppercase flex items-center gap-3">
+                <Sparkles className="text-[#ff5500]" size={24} />
                 ESTRATÉGIA
               </h1>
+              <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mt-2">Marketing Intelligence</p>
             </div>
 
-            <form onSubmit={handleGenerate} className="flex flex-col gap-5">
+            <form onSubmit={handleGenerate} className="flex flex-col gap-6">
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-2 text-gray-400">Cliente / Projeto</label>
+                <label className="block text-[11px] uppercase tracking-widest font-black mb-3 text-black">Cliente / Projeto</label>
                 <input 
                   required
                   type="text" 
-                  className="w-full input-glass rounded-xl p-3 text-sm outline-none" 
+                  className="w-full input-glass rounded-2xl p-4 text-sm border-2 border-gray-100 focus:border-[#2200ff] outline-none font-bold" 
                   placeholder="Nome do cliente"
                   value={formData.clientName}
                   onChange={(e) => setFormData({...formData, clientName: e.target.value})}
@@ -273,11 +281,11 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-2 text-gray-400">Perfil (@)</label>
+                <label className="block text-[11px] uppercase tracking-widest font-black mb-3 text-black">Perfil (@)</label>
                 <input 
                   required
                   type="text" 
-                  className="w-full input-glass rounded-xl p-3 text-sm outline-none" 
+                  className="w-full input-glass rounded-2xl p-4 text-sm border-2 border-gray-100 focus:border-[#2200ff] outline-none font-bold" 
                   placeholder="@usuario"
                   value={formData.instagram}
                   onChange={(e) => setFormData({...formData, instagram: e.target.value})}
@@ -285,11 +293,11 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-2 text-gray-400">Tema da Campanha</label>
+                <label className="block text-[11px] uppercase tracking-widest font-black mb-3 text-black">Tema da Campanha</label>
                 <input 
                   required
                   type="text" 
-                  className="w-full input-glass rounded-xl p-3 text-sm outline-none" 
+                  className="w-full input-glass rounded-2xl p-4 text-sm border-2 border-gray-100 focus:border-[#2200ff] outline-none font-bold" 
                   placeholder="Ex: Lançamento de Inverno"
                   value={formData.theme}
                   onChange={(e) => setFormData({...formData, theme: e.target.value})}
@@ -297,24 +305,24 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] font-bold mb-2 text-gray-400">Público Alvo</label>
+                <label className="block text-[11px] uppercase tracking-widest font-black mb-3 text-black">Público Alvo</label>
                 <input 
                   required
                   type="text" 
-                  className="w-full input-glass rounded-xl p-2.5 text-sm" 
+                  className="w-full input-glass rounded-2xl p-4 text-sm border-2 border-gray-100 focus:border-[#2200ff] outline-none font-bold" 
                   placeholder="Quem deve ver os posts?"
                   value={formData.targetAudience}
                   onChange={(e) => setFormData({...formData, targetAudience: e.target.value})}
                 />
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="block text-[11px] uppercase tracking-wider font-bold mb-1.5 text-indigo-300/60">Dias</label>
+                  <label className="block text-[11px] uppercase tracking-widest font-black mb-3 text-black">Dias</label>
                   <input 
                     required
                     type="number" 
-                    className="w-full input-glass rounded-xl p-2.5 text-sm" 
+                    className="w-full input-glass rounded-2xl p-4 text-sm border-2 border-gray-100 font-bold" 
                     value={formData.days}
                     onChange={(e) => setFormData({...formData, days: e.target.value})}
                   />
@@ -323,11 +331,11 @@ export default function Home() {
                   <button 
                     type="button"
                     onClick={() => setShowChat(!showChat)}
-                    className={`w-full p-2.5 rounded-xl border flex items-center justify-center gap-2 transition-all text-xs font-bold ${
-                      showChat ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                    className={`w-full p-4 rounded-2xl border-2 flex items-center justify-center gap-2 transition-all text-[11px] font-black uppercase tracking-tighter ${
+                      showChat ? 'bg-[#2200ff] border-[#2200ff] text-white' : 'bg-gray-50 border-gray-100 text-gray-500 hover:border-black hover:text-black shadow-sm'
                     }`}
                   >
-                    <MessageSquare size={14} /> {showChat ? 'Fechar' : 'Chat AI'}
+                    <MessageSquare size={16} /> {showChat ? 'FECHAR' : 'CHAT AI'}
                   </button>
                 </div>
               </div>
@@ -335,10 +343,10 @@ export default function Home() {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="btn-primary mt-2 rounded-xl p-3 flex justify-center items-center gap-2 text-sm font-bold"
+                className="btn-primary mt-4 rounded-2xl p-5 flex justify-center items-center gap-3 text-sm font-black shadow-2xl transition-all active:scale-95"
               >
-                {loading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
-                {loading ? "Sintetizando..." : "Gerar Mês Completo"}
+                {loading ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
+                {loading ? "SINTETIZANDO..." : "GERAR MÊS COMPLETO"}
               </button>
             </form>
           </div>

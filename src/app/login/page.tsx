@@ -50,27 +50,34 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
       <div className="w-full max-w-md animate-in fade-in zoom-in duration-500">
-        <div className="glass-panel p-10 rounded-[2.5rem] shadow-xl border-gray-100">
-          <div className="text-center mb-10">
-            <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-              <div className="w-8 h-8 border-4 border-white transform rotate-45"></div>
+        <div className="glass-panel p-12 rounded-[3rem] shadow-2xl border-white bg-white">
+          <div className="text-center mb-12">
+            <div className="w-24 h-24 bg-black rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-2xl transform hover:scale-105 transition-transform duration-500">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
+                <path d="M4 4H20V20H4V4Z" stroke="currentColor" strokeWidth="2.5" />
+                <path d="M4 12H16V20" stroke="currentColor" strokeWidth="2.5" />
+                <path d="M12 4V12" stroke="currentColor" strokeWidth="2.5" />
+              </svg>
             </div>
-            <h1 className="text-2xl font-black tracking-tighter text-black uppercase">Performance <span className="font-light text-gray-500">Digital</span></h1>
-            <p className="text-gray-400 text-[10px] uppercase tracking-[0.3em] mt-2 font-medium">Marketing Strategy Platform</p>
+            <h1 className="text-3xl font-black tracking-tighter text-black uppercase leading-tight">
+              Performance <br />
+              <span className="text-[#ff5500]">Digital</span>
+            </h1>
+            <p className="text-gray-400 text-[11px] uppercase tracking-[0.4em] mt-4 font-black">Intelligence Platform</p>
           </div>
 
-          <form onSubmit={handleAuth} className="flex flex-col gap-5">
+          <form onSubmit={handleAuth} className="flex flex-col gap-6">
             {!isLogin && (
               <div>
-                <label className="block text-[10px] uppercase tracking-widest font-bold mb-2 text-gray-400">Nome Completo</label>
+                <label className="block text-[11px] uppercase tracking-widest font-black mb-3 text-black">Nome Completo</label>
                 <div className="relative">
-                  <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                   <input 
                     required
                     type="text" 
-                    className="w-full input-glass rounded-2xl p-3 pl-11 text-sm outline-none" 
+                    className="w-full input-glass rounded-2xl p-4 pl-12 text-sm outline-none border-2 border-gray-100 focus:border-[#2200ff]" 
                     placeholder="Seu nome"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
@@ -80,13 +87,13 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label className="block text-[10px] uppercase tracking-widest font-bold mb-2 text-gray-400">E-mail Corporativo</label>
+              <label className="block text-[11px] uppercase tracking-widest font-black mb-3 text-black">E-mail Corporativo</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
                   required
                   type="email" 
-                  className="w-full input-glass rounded-2xl p-3 pl-11 text-sm outline-none" 
+                  className="w-full input-glass rounded-2xl p-4 pl-12 text-sm outline-none border-2 border-gray-100 focus:border-[#2200ff]" 
                   placeholder="exemplo@empresa.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -95,20 +102,20 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-[10px] uppercase tracking-widest font-bold text-gray-400">Senha</label>
+              <div className="flex justify-between items-center mb-3">
+                <label className="block text-[11px] uppercase tracking-widest font-black text-black">Senha</label>
                 {isLogin && (
-                  <Link href="/forgot-password" className="text-[10px] text-black hover:underline font-bold uppercase tracking-widest transition-colors">
+                  <Link href="/forgot-password" core-size={16} className="text-[11px] text-[#ff5500] hover:underline font-black uppercase tracking-widest">
                     Esqueceu?
                   </Link>
                 )}
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
                   required
                   type="password" 
-                  className="w-full input-glass rounded-2xl p-3 pl-11 text-sm outline-none" 
+                  className="w-full input-glass rounded-2xl p-4 pl-12 text-sm outline-none border-2 border-gray-100 focus:border-[#2200ff]" 
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -117,7 +124,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-100 text-red-500 text-[11px] font-bold uppercase tracking-tighter">
+              <div className="p-4 rounded-2xl bg-red-50 border-2 border-red-100 text-red-600 text-[11px] font-black uppercase">
                 {error}
               </div>
             )}
@@ -125,25 +132,25 @@ export default function LoginPage() {
             <button 
               type="submit" 
               disabled={loading}
-              className="btn-primary mt-4 rounded-2xl p-4 flex justify-center items-center gap-2 text-sm font-bold shadow-lg shadow-black/10"
+              className="btn-primary mt-6 rounded-2xl p-5 flex justify-center items-center gap-3 text-sm font-black shadow-2xl transition-all active:scale-95"
             >
-              {loading ? <Loader2 className="animate-spin" size={18} /> : null}
+              {loading ? <Loader2 className="animate-spin" size={20} /> : null}
               {isLogin ? "ACESSAR PLATAFORMA" : "CRIAR CONTA AGORA"}
             </button>
           </form>
 
-          <div className="mt-10 text-center">
+          <div className="mt-12 text-center">
             <button 
               onClick={() => setIsLogin(!isLogin)}
-              className="text-[11px] text-gray-400 hover:text-black font-bold uppercase tracking-widest transition-colors"
+              className="text-[12px] text-gray-500 hover:text-black font-black uppercase tracking-widest transition-colors"
             >
               {isLogin ? "Novo aqui? Cadastre-se gratuitamente" : "Já é membro? Clique para entrar"}
             </button>
           </div>
         </div>
         
-        <p className="text-center mt-10 text-[9px] text-gray-400 uppercase tracking-[0.4em] font-medium">
-          © 2026 Performance Digital • Intelligence & Growth
+        <p className="text-center mt-12 text-[10px] text-gray-400 uppercase tracking-[0.5em] font-black">
+          © 2026 Performance Digital • Growth Excellence
         </p>
       </div>
     </div>

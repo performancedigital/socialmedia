@@ -6,17 +6,18 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #09090b;
-  --card-bg: #ffffff;
-  --card-hover: #f8fafc;
-  --accent: #000000;
+  --foreground: #000000;
+  --brand-orange: #ff5500;
+  --brand-blue: #2200ff;
+  --brand-purple: #8800ff;
+  --accent: #ff5500;
   --accent-foreground: #ffffff;
-  --accent-glow: rgba(0, 0, 0, 0.05);
-  --border: #e2e8f0;
-  --border-bright: #cbd5e1;
-  --glass: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --muted: #64748b;
+  --card-bg: #ffffff;
+  --card-hover: #fafafa;
+  --border: #e0e0e0;
+  --border-bright: #000000;
+  --muted: #666666;
+  --gradient-brand: linear-gradient(135deg, #2200ff 0%, #8800ff 50%, #ff5500 100%);
 }
 
 @layer base {
@@ -25,69 +26,64 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     min-height: 100vh;
-    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 .glass-panel {
-  background: var(--glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
 }
 
 .custom-card {
   background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 1rem;
+  border: 2px solid var(--border);
+  border-radius: 1.25rem;
   padding: 1.5rem;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .custom-card:hover {
-  border-color: var(--accent);
-  background: var(--card-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  border-color: var(--brand-orange);
+  box-shadow: 0 20px 40px -15px rgba(255, 85, 0, 0.15);
+  transform: translateY(-4px);
 }
 
 .glow-text {
-  background: linear-gradient(135deg, #000 0%, #444 100%);
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  font-weight: 900;
 }
 
 .input-glass {
-  background: #f8fafc;
-  border: 1px solid var(--border);
-  color: #0f172a;
-  font-size: 0.875rem;
+  background: #ffffff;
+  border: 2px solid #eeeeee;
+  color: #000000;
+  font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .input-glass:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: #ffffff;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 4px rgba(34, 0, 255, 0.05);
 }
 
 .btn-primary {
-  background: #000000;
+  background: var(--gradient-brand);
   color: #ffffff;
   border: none;
-  font-weight: 700;
-  border-radius: 0.75rem;
-  letter-spacing: 0.025em;
-  transition: all 0.2s ease;
+  font-weight: 800;
+  border-radius: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 10px 20px -5px rgba(255, 85, 0, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #18181b;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+  box-shadow: 0 15px 30px -5px rgba(255, 85, 0, 0.4);
 }
 
 /* Custom Scrollbar */
